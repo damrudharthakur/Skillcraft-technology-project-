@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch - SkillCraft Task 02</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #0f0f1a;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 16px;
+      color: #fff;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #00c9ff;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 40px;
+      background: linear-gradient(90deg, #00c9ff, #92fe9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Clock Face ── */
+    .clock-wrap {
+      position: relative;
+      width: 260px; height: 260px;
+      margin-bottom: 36px;
+    }
+
+    svg.ring {
+      position: absolute;
+      top: 0; left: 0;
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+
+    .ring-fill {
+      fill: none;
+      stroke: url(#grad);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 754;
+      stroke-dashoffset: 754;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+
+    .clock-inner {
+      position: absolute;
+      inset: 20px;
+      background: #1a1a2e;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(0,201,255,0.08);
+    }
+
+    #display {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ms {
+      font-size: 1.4rem;
+      color: #00c9ff;
+      font-weight: 600;
+      margin-top: -4px;
+    }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 30px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s;
+      min-width: 110px;
+    }
+
+    #startBtn {
+      background: linear-gradient(90deg, #00c9ff, #92fe9d);
+      color: #000;
+    }
+    #startBtn:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,201,255,0.4); }
+
+    #lapBtn {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    #lapBtn:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
+    #lapBtn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    #resetBtn {
+      background: rgba(255,80,80,0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255,80,80,0.3);
+    }
+    #resetBtn:hover { background: rgba(255,80,80,0.25); transform: translateY(-2px); }
+
+    /* ── Laps ── */
+    .laps-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .laps-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .laps-header h3 { font-size: 1rem; color: #aaa; font-weight: 600; }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #ff6b6b;
+      font-size: 0.8rem;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    .clear-btn:hover { opacity: 1; }
+
+    #lapList {
+      list-style: none;
+      max-height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+    }
+
+    #lapList::-webkit-scrollbar { width: 4px; }
+    #lapList::-webkit-scrollbar-thumb { background: rgba(0,201,255,0.3); border-radius: 4px; }
+
+    .lap-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1a1a2e;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      animation: slideIn 0.25s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity:0; transform: translateY(-8px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    .lap-item.best  { border-color: rgba(146,254,157,0.4); }
+    .lap-item.worst { border-color: rgba(255,107,107,0.4); }
+
+    .lap-num { color: #777; font-size: 0.85rem; }
+    .lap-time { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .lap-tag {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .tag-best  { background: rgba(146,254,157,0.15); color: #92fe9d; }
+    .tag-worst { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+
+    .empty-msg { color: #444; text-align: center; padding: 24px; font-size: 0.9rem; }
+
+    footer {
+      margin-top: 48px;
+      color: #333;
+      font-size: 0.8rem;
+    }
+    footer span { color: #00c9ff; }
+  </style>
+</head>
+<body>
+
+<p class="badge">⏱ SkillCraft Technology — Task 02</p>
+<h1>Stopwatch App</h1>
+
+<!-- Clock -->
+<div class="clock-wrap">
+  <svg class="ring" width="260" height="260" viewBox="0 0 260 260">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="#00c9ff"/>
+        <stop offset="100%" stop-color="#92fe9d"/>
+      </linearGradient>
+    </defs>
+    <circle class="ring-bg"   cx="130" cy="130" r="120"/>
+    <circle class="ring-fill" cx="130" cy="130" r="120" id="ringArc"/>
+  </svg>
+  <div class="clock-inner">
+    <div id="display">00:00</div>
+    <div class="ms" id="msDisplay">.00</div>
+  </div>
+</div>
+
+<!-- Buttons -->
+<div class="btn-row">
+  <button class="btn" id="startBtn" onclick="toggleStart()">Start</button>
+  <button class="btn" id="lapBtn"   onclick="addLap()" disabled>Lap</button>
+  <button class="btn" id="resetBtn" onclick="resetWatch()">Reset</button>
+</div>
+
+<!-- Laps -->
+<div class="laps-wrap">
+  <div class="laps-header">
+    <h3 id="lapCount">Laps (0)</h3>
+    <button class="clear-btn" onclick="clearLaps()">Clear</button>
+  </div>
+  <ul id="lapList"><li class="empty-msg">No laps recorded yet</li></ul>
+</div>
+
+<footer>Built for <span>SkillCraft Technology</span> · Task 02</footer>
+
+<script>
+  let startTime = 0, elapsed = 0, timerID = null;
+  let running = false;
+  let laps = [];
+  let lapStart = 0;
+
+  const display   = document.getElementById('display');
+  const msDisplay = document.getElementById('msDisplay');
+  const startBtn  = document.getElementById('startBtn');
+  const lapBtn    = document.getElementById('lapBtn');
+  const lapList   = document.getElementById('lapList');
+  const lapCount  = document.getElementById('lapCount');
+  const arc       = document.getElementById('ringArc');
+  const CIRCUM    = 754; // 2π×120
+
+  function fmt(ms) {
+    const totalSec = Math.floor(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  }
+  function fmtMs(ms) { return '.' + String(Math.floor((ms % 1000)/10)).padStart(2,'0'); }
+  function fmtFull(ms) { return fmt(ms) + fmtMs(ms); }
+
+  function updateArc(ms) {
+    // Rotate once every 60 seconds
+    const sec = (ms / 1000) % 60;
+    const offset = CIRCUM - (sec / 60) * CIRCUM;
+    arc.style.strokeDashoffset = offset;
+  }
+
+  function tick() {
+    elapsed = Date.now() - startTime;
+    display.textContent   = fmt(elapsed);
+    msDisplay.textContent = fmtMs(elapsed);
+    updateArc(elapsed);
+  }
+
+  function toggleStart() {
+    if (!running) {
+      startTime = Date.now() - elapsed;
+      lapStart  = lapStart === 0 ? startTime : lapStart;
+      timerID   = setInterval(tick, 30);
+      running   = true;
+      startBtn.textContent = 'Pause';
+      startBtn.style.background = 'linear-gradient(90deg,#ff6b6b,#ffa07a)';
+      lapBtn.disabled = false;
+    } else {
+      clearInterval(timerID);
+      running = false;
+      startBtn.textContent = 'Resume';
+      startBtn.style.background = 'linear-gradient(90deg,#00c9ff,#92fe9d)';
+      lapBtn.disabled = true;
+    }
+  }
+
+  function resetWatch() {
+    clearInterval(timerID);
+    running = false; elapsed = 0; lapStart = 0;
+    display.textContent   = '00:00';
+    msDisplay.textContent = '.00';
+    arc.style.strokeDashoffset = CIRCUM;
+    startBtn.textContent = 'Start';
+    startBtn.style.background = 'linear-gradient(90deg,#00c9ff,#92fe9d)';
+    lapBtn.disabled = true;
+  }
+
+  function addLap() {
+    const now = Date.now();
+    const lapTime = now - lapStart;
+    lapStart = now;
+    laps.push(lapTime);
+    renderLaps();
+  }
+
+  function clearLaps() { laps = []; renderLaps(); }
+
+  function renderLaps() {
+    lapCount.textContent = `Laps (${laps.length})`;
+    if (!laps.length) {
+      lapList.innerHTML = '<li class="empty-msg">No laps recorded yet</li>';
+      return;
+    }
+    const best  = Math.min(...laps);
+    const worst = Math.max(...laps);
+    lapList.innerHTML = laps.map((t, i) => {
+      const isBest  = laps.length > 1 && t === best;
+      const isWorst = laps.length > 1 && t === worst;
+      const cls  = isBest ? 'lap-item best' : isWorst ? 'lap-item worst' : 'lap-item';
+      const tag  = isBest
+        ? '<span class="lap-tag tag-best">Best</span>'
+        : isWorst
+        ? '<span class="lap-tag tag-worst">Worst</span>'
+        : '<span></span>';
+      return `<li class="${cls}">
+        <span class="lap-num">Lap ${i+1}</span>
+        <span class="lap-time">${fmtFull(t)}</span>
+        ${tag}
+      </li>`;
+    }).reverse().join('');
+  }
+</script>
+</body>
+</html>
