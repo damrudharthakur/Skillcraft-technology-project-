@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>To-Do App</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    padding: 20px 16px 40px;
+    color: #fff;
+  }
+  h1 { text-align: center; font-size: 1.7rem; color: #00e5ff; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 0.78rem; color: #aaa; margin-bottom: 22px; }
+
+  .card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 620px;
+    margin: 0 auto 18px;
+  }
+
+  /* ADD TASK */
+  .add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .add-row input[type="text"] {
+    flex: 1; min-width: 0;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: #fff; font-size: 0.95rem; outline: none;
+  }
+  .add-row input::placeholder { color: #888; }
+  .add-row input[type="datetime-local"] {
+    padding: 11px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: #ccc; font-size: 0.85rem; outline: none;
+    width: 100%;
+  }
+  .add-row input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+  .row2 { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .row2 select {
+    flex: 1;
+    padding: 11px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: #fff; font-size: 0.85rem; outline: none;
+  }
+  .row2 select option { background: #302b63; }
+  .add-btn {
+    padding: 11px 20px;
+    border: none; border-radius: 10px;
+    background: linear-gradient(90deg, #00e5ff, #7b2ff7);
+    color: #fff; font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .add-btn:hover { opacity: 0.85; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .f-btn {
+    padding: 7px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06); color: #ccc;
+    font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+  }
+  .f-btn.active { background: linear-gradient(90deg,#00e5ff,#7b2ff7); border-color: transparent; color: #fff; font-weight: 600; }
+
+  /* STATS */
+  .stats { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .stat-box {
+    flex: 1; min-width: 80px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 10px;
+    text-align: center;
+  }
+  .stat-box .num { font-size: 1.4rem; font-weight: 700; color: #00e5ff; }
+  .stat-box .lbl { font-size: 0.7rem; color: #aaa; }
+
+  /* TASK LIST */
+  #taskList { display: flex; flex-direction: column; gap: 10px; }
+
+  .task-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 14px;
+    transition: all 0.2s;
+  }
+  .task-item.done { opacity: 0.55; }
+  .task-top { display: flex; align-items: flex-start; gap: 10px; }
+  .task-cb { width: 20px; height: 20px; accent-color: #00e5ff; cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+  .task-title {
+    flex: 1; font-size: 0.97rem; font-weight: 500; word-break: break-word;
+    transition: all 0.2s;
+  }
+  .task-item.done .task-title { text-decoration: line-through; color: #888; }
+  .task-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .ic-btn {
+    background: rgba(255,255,255,0.08); border: none; border-radius: 8px;
+    color: #ccc; font-size: 0.85rem; padding: 5px 9px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .ic-btn:hover { background: rgba(255,255,255,0.18); }
+  .ic-btn.del:hover { background: rgba(255,60,60,0.3); color: #ff6b6b; }
+
+  .task-meta { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .priority-badge {
+    font-size: 0.7rem; font-weight: 700; padding: 2px 10px;
+    border-radius: 20px; text-transform: uppercase;
+  }
+  .p-high { background: rgba(255,60,60,0.2); color: #ff6b6b; border: 1px solid #ff6b6b55; }
+  .p-medium { background: rgba(255,180,0,0.2); color: #ffb400; border: 1px solid #ffb40055; }
+  .p-low { background: rgba(0,200,100,0.2); color: #00c864; border: 1px solid #00c86455; }
+  .task-date { font-size: 0.72rem; color: #888; }
+  .task-due { font-size: 0.72rem; }
+  .due-ok { color: #00c864; }
+  .due-late { color: #ff6b6b; }
+
+  /* EDIT MODE */
+  .edit-input {
+    width: 100%; padding: 8px 10px; border-radius: 8px;
+    border: 1px solid #00e5ff55; background: rgba(255,255,255,0.08);
+    color: #fff; font-size: 0.95rem; outline: none; margin-bottom: 6px;
+  }
+  .edit-actions { display: flex; gap: 8px; }
+  .save-btn {
+    padding: 7px 16px; border: none; border-radius: 8px;
+    background: #00e5ff; color: #000; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+  }
+  .cancel-btn {
+    padding: 7px 16px; border: none; border-radius: 8px;
+    background: rgba(255,255,255,0.1); color: #fff; font-size: 0.85rem; cursor: pointer;
+  }
+
+  .empty { text-align: center; color: #555; padding: 30px 0; font-size: 0.95rem; }
+</style>
+</head>
+<body>
+
+<h1>📝 To-Do App</h1>
+<p class="subtitle">SkillCraft Technology — Task 04</p>
+
+<!-- ADD TASK CARD -->
+<div class="card">
+  <div class="add-row">
+    <input type="text" id="taskInput" placeholder="Add a new task..." onkeydown="if(event.key==='Enter') addTask()" />
+    <button class="add-btn" onclick="addTask()">+ Add</button>
+  </div>
+  <div class="row2">
+    <select id="prioritySelect">
+      <option value="medium">🟡 Medium Priority</option>
+      <option value="high">🔴 High Priority</option>
+      <option value="low">🟢 Low Priority</option>
+    </select>
+    <input type="datetime-local" id="dueDate" />
+  </div>
+</div>
+
+<!-- STATS + LIST CARD -->
+<div class="card">
+  <div class="stats">
+    <div class="stat-box"><div class="num" id="sTotal">0</div><div class="lbl">Total</div></div>
+    <div class="stat-box"><div class="num" id="sPending">0</div><div class="lbl">Pending</div></div>
+    <div class="stat-box"><div class="num" id="sDone">0</div><div class="lbl">Done</div></div>
+    <div class="stat-box"><div class="num" id="sHigh">0</div><div class="lbl">High ⚠️</div></div>
+  </div>
+
+  <div class="filters">
+    <button class="f-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="f-btn" onclick="setFilter('pending',this)">Pending</button>
+    <button class="f-btn" onclick="setFilter('done',this)">Completed</button>
+    <button class="f-btn" onclick="setFilter('high',this)">🔴 High</button>
+  </div>
+
+  <div id="taskList"></div>
+</div>
+
+<script>
+let tasks = [];
+let filter = 'all';
+let editId = null;
+
+function addTask() {
+  const val = document.getElementById('taskInput').value.trim();
+  if (!val) return;
+  tasks.unshift({
+    id: Date.now(),
+    title: val,
+    done: false,
+    priority: document.getElementById('prioritySelect').value,
+    due: document.getElementById('dueDate').value,
+    created: new Date().toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+  });
+  document.getElementById('taskInput').value = '';
+  document.getElementById('dueDate').value = '';
+  render();
+}
+
+function toggleDone(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) { t.done = !t.done; render(); }
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  render();
+}
+
+function startEdit(id) {
+  editId = id;
+  render();
+}
+
+function saveEdit(id) {
+  const val = document.getElementById('editInput_' + id).value.trim();
+  const due = document.getElementById('editDue_' + id).value;
+  const pri = document.getElementById('editPri_' + id).value;
+  if (!val) return;
+  const t = tasks.find(t => t.id === id);
+  if (t) { t.title = val; t.due = due; t.priority = pri; }
+  editId = null;
+  render();
+}
+
+function cancelEdit() { editId = null; render(); }
+
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  // Stats
+  document.getElementById('sTotal').textContent = tasks.length;
+  document.getElementById('sPending').textContent = tasks.filter(t => !t.done).length;
+  document.getElementById('sDone').textContent = tasks.filter(t => t.done).length;
+  document.getElementById('sHigh').textContent = tasks.filter(t => t.priority === 'high' && !t.done).length;
+
+  let visible = tasks;
+  if (filter === 'pending') visible = tasks.filter(t => !t.done);
+  else if (filter === 'done') visible = tasks.filter(t => t.done);
+  else if (filter === 'high') visible = tasks.filter(t => t.priority === 'high');
+
+  const list = document.getElementById('taskList');
+  if (visible.length === 0) { list.innerHTML = '<div class="empty">No tasks here 🎉</div>'; return; }
+
+  list.innerHTML = visible.map(t => {
+    const pClass = t.priority === 'high' ? 'p-high' : t.priority === 'low' ? 'p-low' : 'p-medium';
+    const pLabel = t.priority === 'high' ? '🔴 High' : t.priority === 'low' ? '🟢 Low' : '🟡 Medium';
+    let dueHtml = '';
+    if (t.due) {
+      const dueDate = new Date(t.due);
+      const now = new Date();
+      const late = !t.done && dueDate < now;
+      dueHtml = `<span class="task-due ${late ? 'due-late' : 'due-ok'}">
+        ${late ? '⏰ Overdue:' : '📅'} ${dueDate.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
+      </span>`;
+    }
+
+    if (editId === t.id) {
+      return `<div class="task-item">
+        <input class="edit-input" id="editInput_${t.id}" value="${t.title.replace(/"/g,'&quot;')}" />
+        <div class="row2" style="margin-bottom:8px">
+          <select id="editPri_${t.id}" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:0.85rem;outline:none;">
+            <option value="medium" ${t.priority==='medium'?'selected':''}>🟡 Medium</option>
+            <option value="high" ${t.priority==='high'?'selected':''}>🔴 High</option>
+            <option value="low" ${t.priority==='low'?'selected':''}>🟢 Low</option>
+          </select>
+          <input type="datetime-local" id="editDue_${t.id}" value="${t.due||''}" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#ccc;font-size:0.85rem;outline:none;" />
+        </div>
+        <div class="edit-actions">
+          <button class="save-btn" onclick="saveEdit(${t.id})">Save</button>
+          <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>`;
+    }
+
+    return `<div class="task-item ${t.done ? 'done' : ''}">
+      <div class="task-top">
+        <input type="checkbox" class="task-cb" ${t.done?'checked':''} onchange="toggleDone(${t.id})" />
+        <span class="task-title">${t.title}</span>
+        <div class="task-actions">
+          <button class="ic-btn" onclick="startEdit(${t.id})">✏️</button>
+          <button class="ic-btn del" onclick="deleteTask(${t.id})">🗑️</button>
+        </div>
+      </div>
+      <div class="task-meta">
+        <span class="priority-badge ${pClass}">${pLabel}</span>
+        <span class="task-date">Added: ${t.created}</span>
+        ${dueHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
