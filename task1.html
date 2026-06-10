@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkillCraft - Responsive Landing Page</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #00c9ff;
+      --secondary: #92fe9d;
+      --dark: #0f0f1a;
+      --card-bg: #1a1a2e;
+      --nav-bg: rgba(15,15,26,0.5);
+      --nav-scrolled: rgba(15,15,26,0.97);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--dark);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ───── NAVBAR ───── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 6%;
+      background: var(--nav-bg);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid transparent;
+      transition: all 0.4s ease;
+    }
+
+    nav.scrolled {
+      background: var(--nav-scrolled);
+      border-bottom: 1px solid rgba(0,201,255,0.25);
+      padding: 12px 6%;
+      box-shadow: 0 4px 30px rgba(0,201,255,0.1);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      position: relative;
+      padding-bottom: 4px;
+      transition: color 0.3s;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 25px; height: 2px;
+      background: var(--primary);
+      transition: all 0.3s;
+      border-radius: 2px;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile nav */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,15,26,0.98);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.8rem;
+      font-weight: 700;
+      transition: color 0.3s;
+    }
+    .mobile-menu a:hover { color: var(--primary); }
+
+    /* ───── HERO ───── */
+    #home {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px 6% 60px;
+      background: radial-gradient(ellipse at 50% 40%, rgba(0,201,255,0.12) 0%, transparent 70%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #home::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(146,254,157,0.07), transparent 70%);
+      top: 10%; right: -100px;
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-30px); }
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(0,201,255,0.12);
+      border: 1px solid rgba(0,201,255,0.3);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      padding: 6px 18px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      max-width: 600px;
+      margin: 0 auto 36px;
+      color: #aaa;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    .btn {
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: #000;
+      border: none;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,201,255,0.4); }
+
+    .btn-outline {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-3px); }
+
+    /* ───── SECTIONS ───── */
+    section { padding: 100px 6%; }
+
+    .section-label {
+      text-align: center;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      margin-bottom: 60px;
+    }
+
+    /* ───── FEATURES ───── */
+    #features { background: #0d0d1f; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover { transform: translateY(-8px); border-color: rgba(0,201,255,0.3); }
+    .feature-card:hover::before { transform: scaleX(1); }
+
+    .feature-icon {
+      font-size: 2.2rem;
+      margin-bottom: 18px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .feature-card p { color: #888; line-height: 1.6; font-size: 0.95rem; }
+
+    /* ───── ABOUT ───── */
+    #about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-img {
+      background: linear-gradient(135deg, rgba(0,201,255,0.15), rgba(146,254,157,0.1));
+      border: 1px solid rgba(0,201,255,0.2);
+      border-radius: 20px;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 70%, rgba(0,201,255,0.1), transparent);
+    }
+
+    .about-text h2 {
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 800;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .about-text h2 span {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .about-text p { color: #999; line-height: 1.8; margin-bottom: 16px; font-size: 1rem; }
+
+    .stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 32px;
+    }
+
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label { color: #777; font-size: 0.85rem; margin-top: 4px; }
+
+    /* ───── CONTACT ───── */
+    #contact { background: #0d0d1f; text-align: center; }
+
+    .contact-box {
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid rgba(0,201,255,0.2);
+      border-radius: 20px;
+      padding: 48px 40px;
+    }
+
+    .input-group { margin-bottom: 18px; text-align: left; }
+    .input-group label { font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 6px; }
+
+    .input-group input,
+    .input-group textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border 0.3s;
+      resize: none;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus { border-color: var(--primary); }
+
+    /* ───── FOOTER ───── */
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #555;
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    footer span { color: var(--primary); }
+
+    /* ───── RESPONSIVE ───── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+
+      #about {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .about-img { height: 220px; font-size: 4rem; }
+      .stats { gap: 20px; }
+
+      .contact-box { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───── NAVBAR ───── -->
+<nav id="navbar">
+  <div class="logo">SkillCraft</div>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home" onclick="closeMobile()">Home</a>
+  <a href="#features" onclick="closeMobile()">Features</a>
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+</div>
+
+<!-- ───── HERO ───── -->
+<section id="home">
+  <div>
+    <div class="hero-badge">🚀 SkillCraft Technology</div>
+    <h1 class="hero-title">Build Skills.<br><span>Shape the Future.</span></h1>
+    <p class="hero-sub">A modern responsive landing page with an interactive fixed navigation bar that changes style on scroll and hover — built for Task 01.</p>
+    <div class="btn-group">
+      <a href="#features" class="btn btn-primary">Explore Features</a>
+      <a href="#contact" class="btn btn-outline">Get in Touch</a>
+    </div>
+  </div>
+</section>
+
+<!-- ───── FEATURES ───── -->
+<section id="features">
+  <p class="section-label">What We Offer</p>
+  <h2 class="section-title">Core Features</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Interactive Navbar</h3>
+      <p>Fixed navigation that changes color on scroll and highlights items on hover with a smooth underline effect.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <h3>Fully Responsive</h3>
+      <p>Optimized for all screen sizes — desktop, tablet, and mobile — with a hamburger menu for small screens.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✨</div>
+      <h3>Smooth Animations</h3>
+      <p>Floating elements, hover transitions, and gradient effects create a premium, modern visual experience.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Pure HTML/CSS/JS</h3>
+      <p>Zero dependencies. Lightweight and blazing fast — built entirely with vanilla web technologies.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── ABOUT ───── -->
+<section id="about">
+  <div class="about-img">🛠️</div>
+  <div class="about-text">
+    <p class="section-label">Who We Are</p>
+    <h2>Crafting <span>Skills</span> for Tomorrow's World</h2>
+    <p>SkillCraft Technology is dedicated to helping developers grow through hands-on tasks, real-world projects, and guided mentorship.</p>
+    <p>This landing page is built as Task 01 of the internship — demonstrating responsive design, interactive navigation, and clean modern UI.</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">50+</div>
+        <div class="stat-label">Projects</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">10K+</div>
+        <div class="stat-label">Learners</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Practical</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── CONTACT ───── -->
+<section id="contact">
+  <p class="section-label">Reach Out</p>
+  <h2 class="section-title">Get In Touch</h2>
+  <div class="contact-box">
+    <div class="input-group">
+      <label>Your Name</label>
+      <input type="text" placeholder="Saksham" />
+    </div>
+    <div class="input-group">
+      <label>Email Address</label>
+      <input type="email" placeholder="you@example.com" />
+    </div>
+    <div class="input-group">
+      <label>Message</label>
+      <textarea rows="4" placeholder="Write your message..."></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%;border:none;">Send Message 🚀</button>
+  </div>
+</section>
+
+<!-- ───── FOOTER ───── -->
+<footer>
+  Built with ❤️ for <span>SkillCraft Technology</span> — Task 01 · Responsive Landing Page
+</footer>
+
+<script>
+  // ── Scroll: change navbar style
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // ── Hamburger toggle
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+
+  function closeMobile() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }
+</script>
+
+</body>
+</html>
